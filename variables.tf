@@ -5,6 +5,7 @@ variable "rule_description" {}
 variable "crontabs" {}
 variable "taskname" {}
 variable "env" {}
+variable "awslogs_retention" {}
 
 # TD task definitions
 #variable "container_definitions" {

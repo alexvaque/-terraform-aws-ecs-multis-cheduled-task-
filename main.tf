@@ -125,6 +125,14 @@ data "template_file" "container_definitions_data" {
 data "aws_region" "current" {
 }
 
+resource "aws_cloudwatch_log_group" "stg-exec-b2bapi" {
+  count    = "${length(var.crontabs)}"
+
+  name              = "${var.crontabs[count.index].taskname}-${var.crontabs[count.index].event_target_id}"
+  retention_in_days = "${var.awslogs_retention}"
+}
+
+
 # ECS Task Execution IAM Role # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html # https://www.terraform.io/docs/providers/aws/r/iam_role.html
 resource "aws_iam_role" "ecs_task_execution" {
   count    = "${length(var.crontabs)}"
