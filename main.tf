@@ -72,7 +72,7 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
 resource "aws_iam_role" "ecs_events" {
   count                = "${length(var.crontabs)}"
 
-  name               = "${var.taskname}-ecs-events"
+  name               = "${var.crontabs[count.index].taskname}-ecs-events"
   assume_role_policy = data.aws_iam_policy_document.ecs_events_assume_role_policy.json
   path               = var.iam_path
   description        = var.description
@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "ecs_events_assume_role_policy" {
 resource "aws_iam_policy" "ecs_events" {
   count       = "${length(var.crontabs)}"
 
-  name        = "${var.taskname}-ecs-events"
+  name        = "${var.crontabs[count.index].taskname}-ecs-events"
   policy      = data.aws_iam_policy.ecs_events.policy
   path        = var.iam_path
   description = var.description
