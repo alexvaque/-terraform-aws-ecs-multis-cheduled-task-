@@ -12,7 +12,7 @@ data "aws_iam_role" "ec2Role" {
 #}
 
 resource "aws_cloudwatch_event_rule" "scheduled_task" {
-  count = "${length(var.crontabs)}"
+  count                = "${length(var.crontabs)}"
   name                 = "${var.crontabs[count.index].taskname}" #ec2_scheduled_task"
   description          = "${var.rule_description} ${var.crontabs[count.index].taskname}"
   schedule_expression  = "${var.crontabs[count.index].schedule_expression}"
@@ -62,6 +62,64 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
 #  ]
 #}
 #DOC
+}
+
+# CloudWatch Events IAM Role
+#
+# https://docs.aws.amazon.com/AmazonECS/latest/developerguide/CWE_IAM_role.html
+
+# https://www.terraform.io/docs/providers/aws/r/iam_role.html
+resource "aws_iam_role" "ecs_events" {
+  count                = "${length(var.crontabs)}"
+
+  name               = local.ecs_events_iam_name
+  assume_role_policy = data.aws_iam_policy_document.ecs_events_assume_role_policy.json
+  path               = var.iam_path
+  description        = var.description
+  #tags = merge(
+  #  {
+  #    "Name" = local.ecs_events_iam_name
+  #  },
+  #  var.tags,
+  #)
+}
+
+data "aws_iam_policy_document" "ecs_events_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+  }
+}
+
+# https://www.terraform.io/docs/providers/aws/r/iam_policy.html
+resource "aws_iam_policy" "ecs_events" {
+  count       = "${length(var.crontabs)}"
+
+  name        = local.ecs_events_iam_name
+  policy      = data.aws_iam_policy.ecs_events.policy
+  path        = var.iam_path
+  description = var.description
+}
+
+data "aws_iam_policy" "ecs_events" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+}
+
+# https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html
+resource "aws_iam_role_policy_attachment" "ecs_events" {
+  count       = "${length(var.crontabs)}"
+
+  role       = aws_iam_role.ecs_events[count.index].name
+  policy_arn = aws_iam_policy.ecs_events[count.index].arn
+}
+
+locals {
+  ecs_events_iam_name = "${var.name}-ecs-events"
+  enabled_ecs_events  = var.enabled && var.create_ecs_events_role ? 1 : 0
 }
 
 # ECS Task Definitions # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html # https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html
