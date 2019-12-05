@@ -72,13 +72,13 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
 resource "aws_iam_role" "ecs_events" {
   count                = "${length(var.crontabs)}"
 
-  name               = local.ecs_events_iam_name
+  name               = "${var.taskname}-ecs-events"
   assume_role_policy = data.aws_iam_policy_document.ecs_events_assume_role_policy.json
   path               = var.iam_path
   description        = var.description
   #tags = merge(
   #  {
-  #    "Name" = local.ecs_events_iam_name
+  #    "Name" = "${var.taskname}-ecs-events"
   #  },
   #  var.tags,
   #)
@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "ecs_events_assume_role_policy" {
 resource "aws_iam_policy" "ecs_events" {
   count       = "${length(var.crontabs)}"
 
-  name        = local.ecs_events_iam_name
+  name        = "${var.taskname}-ecs-events"
   policy      = data.aws_iam_policy.ecs_events.policy
   path        = var.iam_path
   description = var.description
@@ -115,11 +115,6 @@ resource "aws_iam_role_policy_attachment" "ecs_events" {
 
   role       = aws_iam_role.ecs_events[count.index].name
   policy_arn = aws_iam_policy.ecs_events[count.index].arn
-}
-
-locals {
-  ecs_events_iam_name = "${var.name}-ecs-events"
-  enabled_ecs_events  = var.enabled && var.create_ecs_events_role ? 1 : 0
 }
 
 # ECS Task Definitions # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html # https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html
@@ -233,14 +228,12 @@ resource "aws_iam_policy" "ecs_task_execution" {
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html
 resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
-  count = local.enabled_ecs_task_execution
+  count    = "${length(var.crontabs)}"
 
   role       = aws_iam_role.ecs_task_execution[0].name
   policy_arn = aws_iam_policy.ecs_task_execution[0].arn
 }
 
-locals {
-  enabled_ecs_task_execution  = var.enabled && var.create_ecs_task_execution_role ? 1 : 0
 }
 
 data "aws_iam_policy" "ecs_task_execution" {
