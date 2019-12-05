@@ -23,7 +23,10 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
   target_id = "${var.crontabs[count.index].taskname}-${var.crontabs[count.index].event_target_id}"
   rule      = "${aws_cloudwatch_event_rule.scheduled_task[count.index].name}"
   arn       = "${data.aws_ecs_cluster.cluster.arn}"
-  role_arn  = "${data.aws_iam_role.ec2Role.arn}"
+  #role_arn  = "${data.aws_iam_role.ec2Role.arn}"
+  role_arn  = join("", aws_iam_role.ecs_events[count.index].*.arn)
+  #"${element(aws_iam_role.ecs_task_execution.*.arn, count.index)}"
+
   ecs_target {
     launch_type         = "FARGATE"
     task_count          = var.task_count
