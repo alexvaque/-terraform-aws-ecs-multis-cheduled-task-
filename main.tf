@@ -193,7 +193,7 @@ resource "aws_cloudwatch_log_group" "stg-exec-b2bapi" {
 resource "aws_iam_role" "ecs_task_execution" {
   count    = "${length(var.crontabs)}"
 
-  name               = "${var.crontabs[count.index].taskname}"
+  name               = "${var.crontabs[count.index].taskname}-ecs-task-execution"
   assume_role_policy = "${element(data.aws_iam_policy_document.ecs_task_execution_assume_role_policy.*.json,count.index)}"
 
   path               = var.iam_path
