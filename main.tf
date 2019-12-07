@@ -2,15 +2,6 @@ data "aws_ecs_cluster" "cluster" {
   cluster_name = "${var.cluster_name}" 
 }
 
-data "aws_iam_role" "ec2Role" {
-  name = "${var.name_iam_role}"
-}
-
-#data "aws_ecs_task_definition" "service" {
-#  count = "${length(var.crontabs)}"
-#  task_definition = "${var.crontabs[count.index].task_definition}"
-#}
-
 resource "aws_cloudwatch_event_rule" "scheduled_task" {
   count                = "${length(var.crontabs)}"
   name                 = "${var.crontabs[count.index].taskname}" #ec2_scheduled_task"
@@ -23,7 +14,6 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
   target_id = "${var.crontabs[count.index].taskname}-${var.crontabs[count.index].event_target_id}"
   rule      = "${aws_cloudwatch_event_rule.scheduled_task[count.index].name}"
   arn       = "${data.aws_ecs_cluster.cluster.arn}"
-  #role_arn  = "${data.aws_iam_role.ec2Role.arn}"
   role_arn  = join("", aws_iam_role.ecs_events[count.index].*.arn)
   #"${element(aws_iam_role.ecs_task_execution.*.arn, count.index)}"
 

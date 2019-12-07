@@ -1,5 +1,4 @@
 variable "cluster_name" {}
-variable "name_iam_role" {}
 variable "rule_description" {}
 variable "crontabs" {}
 variable "taskname" {}
