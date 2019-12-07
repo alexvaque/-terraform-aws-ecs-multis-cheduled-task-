@@ -190,12 +190,12 @@ resource "aws_cloudwatch_log_group" "stg-exec-b2bapi" {
 
 
 # ECS Task Execution IAM Role # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html # https://www.terraform.io/docs/providers/aws/r/iam_role.html
+# XEIC
 resource "aws_iam_role" "ecs_task_execution" {
   count    = "${length(var.crontabs)}"
 
   name               = "${var.crontabs[count.index].taskname}-ecs-task-execution"
   assume_role_policy = "${element(data.aws_iam_policy_document.ecs_task_execution_assume_role_policy.*.json,count.index)}"
-
   path               = var.iam_path
   description        = var.description
   #tags = merge(
@@ -220,10 +220,11 @@ data "aws_iam_policy_document" "ecs_task_execution_assume_role_policy" {
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_policy.html
+# XEIC
 resource "aws_iam_policy" "ecs_task_execution" {
-  count    = "${length(var.crontabs)}"
+  count       = "${length(var.crontabs)}"
 
-  name        = "${var.crontabs[count.index].taskname}"
+  name        = "${var.crontabs[count.index].taskname}-ecs-task-execution"
   policy      = "${element(data.aws_iam_policy.ecs_task_execution.*.policy,count.index)}"
   path        = var.iam_path
   description = var.description
