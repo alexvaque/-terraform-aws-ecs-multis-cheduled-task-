@@ -59,7 +59,7 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
 #{
 #  "containerOverrides": [
 #    {
-#      "name": "${var.container_name}",
+#      "name": "${var.image[count.index]}",
 #      "command":${var.crontabs[count.index].command}
 #    }
 #  ]
