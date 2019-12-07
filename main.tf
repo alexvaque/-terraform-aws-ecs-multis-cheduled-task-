@@ -173,7 +173,7 @@ data "aws_region" "current" {
 
 resource "aws_cloudwatch_log_group" "create_log_group" {
   count             = "${length(var.crontabs)}"
-  name              = "${var.awslogs_group}"
+  name              = "${var.crontabs[count.index].awslogs_group}"
   retention_in_days = "${var.awslogs_retention}"
 }
 
