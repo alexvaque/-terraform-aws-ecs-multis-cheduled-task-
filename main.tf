@@ -171,10 +171,9 @@ data "template_file" "container_definitions_data" {
 data "aws_region" "current" {
 }
 
-resource "aws_cloudwatch_log_group" "stg-exec-b2bapi" {
-  count    = "${length(var.crontabs)}"
-
-  name              = "${var.crontabs[count.index].taskname}-${var.crontabs[count.index].event_target_id}"
+resource "aws_cloudwatch_log_group" "create_log_group" {
+  count             = "${length(var.crontabs)}"
+  name              = "${var.awslogs_group}"
   retention_in_days = "${var.awslogs_retention}"
 }
 
